@@ -11,6 +11,7 @@
 			:btnTitle="btnTitle"
 			:disabled="disabled"
 			:error="errors.phone"
+			@btnclick="getVertifyCode"
 		></InputGroup>
 		<!-- 验证码 -->
 		<InputGroup
@@ -28,7 +29,7 @@
 		</div>
 		<!-- 登录按钮 -->
 		<div class="login_btn">
-			<button>登录</button>
+			<button :disabled="isClick" @click="handlelogin">登录</button>
 		</div>
 	</div>
 </template>
@@ -43,7 +44,83 @@
 				verifyCode: "",
 				errors:{},
 				btnTitle:"获取验证码",
-				disabled: false
+				disabled: false,
+			}
+		},
+		computed:{
+			isClick(){
+				if(!this.phone || !this.verifyCode) return true
+				else return false
+			}
+		},
+		methods:{
+			handlelogin(){
+				//取消错误提醒
+				this.errors = {}
+				//发送请求
+				// this.$axios.post("/api/posts/sms_back")
+				if(this.phone == 13112333445 && this.verifyCode == 1234){
+					localStorage.setItem("ele_login",true)
+					this.$router.push("/")
+				}
+				else
+				{
+					//返回错误信息
+					this.errors = {
+						code:err.response.data.msg
+					}
+				}
+			},
+			getVertifyCode(){
+				if(this.validatePhone()){
+					//发送验证码
+					//开始倒计时
+					this.validateBtn();
+					this.$axios.post("/api/posts/sms_send",{
+						//你的聚合数据代码
+						tpl_id:"",//模板ID
+						key:"",
+						phone:this.phone
+					})
+					.then(res => {
+						console.log(res)
+					})
+				}
+			},
+			validateBtn(){
+				let time = 60;
+				let timer = setInterval(() => {
+					if(time == 0){
+						clearInterval(timer);
+						this.btnTitle = "获取验证码";
+						this.disabled = false;
+					}
+					else {
+						//倒计时
+						this.btnTitle = time + "秒后重试";
+						this.disabled = true;
+						time --;
+					}
+				},1000)
+			},
+			validatePhone(){
+				//验证手机
+				if(!this.phone){
+					this.errors = {
+						phone:"手机号码不能为空"
+					}
+					return false
+				}
+				else if(!/^1[345678]\d{9}$/.test(this.phone)){
+					this.errors = {
+						phone:"请填写正确的手机号码"
+					}
+					return false
+				}
+				else {
+					this.errors = {}
+					return true
+				}
 			}
 		},
 		components: {
@@ -52,7 +129,7 @@
 	}
 </script>
 
-<style>
+<style scoped>
 	.login {
 		width: 100%;
 		height: 100%;
@@ -88,5 +165,8 @@
 	.login_des,
 	.login_btn {
 		margin-top: 20px;
+	}
+	.login_btn button[disabled]{
+		background-color: #8bda81;
 	}
 </style>

@@ -3,14 +3,14 @@
 		<!--组件结构-->
 		
 		<!--组件容器-->
-		<div class="input_group">
+		<div class="input_group" :class="{'is-invalid':error}">
 			<!-- 输入框 -->
 			<input :type="type" :value="value" :placeholder="placeholder" :name="name" @input="$emit('input',$event.target.value)" />
 			<!-- 手机号检测按钮 -->
-			<button v-if="btnTitle" :disabled="disabled" @click="$emit('btnClick')">{{btnTitle}}</button>
-			<!-- 验证码错误提醒 -->
-			<div v-if="error" class="invalid-feedback">{{error}}</div>
+			<button v-if="btnTitle" :disabled="disabled" @click="$emit('btnclick')">{{btnTitle}}</button>
 		</div>
+		<!-- 验证码错误提醒 -->
+		<div v-if="error" class="invalid-feedback">{{error}}</div>
 	</div>
 </template>
 
@@ -24,10 +24,13 @@
 			},
 			value:String,
 			placeholder:String,
+			name:String,
 			btnTitle:String,
 			disabled:Boolean,
 			error:String
-		}
+		},
+		methods:{
+		},
 	}
 </script>
 
